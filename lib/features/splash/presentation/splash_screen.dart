@@ -20,10 +20,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFFE1F5FE) : const Color(0xFF0D47A1),
+      backgroundColor: Colors.black,
       body: Center(
         child: Lottie.asset(
           'assets/lottie/logo_animation.json',
