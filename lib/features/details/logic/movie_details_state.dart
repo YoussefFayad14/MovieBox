@@ -8,7 +8,9 @@ class MovieDetailsLoading extends MovieDetailsState {}
 
 class MovieDetailsSuccess extends MovieDetailsState {
   final Movie movie;
-  MovieDetailsSuccess({required this.movie});
+  final bool isFavorite;
+
+  MovieDetailsSuccess({required this.movie, required this.isFavorite});
 }
 
 class MovieDetailsFailure extends MovieDetailsState {

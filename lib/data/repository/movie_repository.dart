@@ -1,5 +1,5 @@
 import 'package:moviebox/data/model/movie.dart';
-import '../remote/MovieService.dart';
+import '../remote/movie_service.dart';
 
 class MovieRepository {
   final MovieService _movieService = MovieService();
