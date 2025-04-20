@@ -1,4 +1,4 @@
-part of 'movie_details_cubit.dart';
+import '../../../data/model/movie.dart';
 
 abstract class MovieDetailsState {}
 
@@ -8,7 +8,7 @@ class MovieDetailsLoading extends MovieDetailsState {}
 
 class MovieDetailsSuccess extends MovieDetailsState {
   final Movie movie;
-  MovieDetailsSuccess(this.movie);
+  MovieDetailsSuccess({required this.movie});
 }
 
 class MovieDetailsFailure extends MovieDetailsState {

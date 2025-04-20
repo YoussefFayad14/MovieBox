@@ -1,10 +1,7 @@
-import 'package:bloc/bloc.dart';
-import 'package:meta/meta.dart';
-import 'package:moviebox/data/repository/MovieRepository.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../data/repository/MovieRepository.dart';
+import 'movie_details_state.dart';
 import '../../../data/model/movie.dart';
-
-part 'movie_details_state.dart';
 
 class MovieDetailsCubit extends Cubit<MovieDetailsState> {
   final MovieRepository repository;
@@ -15,7 +12,7 @@ class MovieDetailsCubit extends Cubit<MovieDetailsState> {
     try {
       final movie = await repository.getMovieDetails(movieId);
       if (movie != null) {
-        emit(MovieDetailsSuccess(movie));
+        emit(MovieDetailsSuccess(movie: movie));
       } else {
         emit(MovieDetailsFailure("Movie not found"));
       }

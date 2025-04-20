@@ -98,7 +98,6 @@ class MovieService {
     }
   }
 
-
   Future<Movie?> getMovieDetails(String movieId) async {
     try {
       final response = await _dio.get(
@@ -119,5 +118,51 @@ class MovieService {
       throw Exception('Failed to load movie details: $e');
     }
   }
+
+  Future<List<dynamic>> fetchSimilarMovies(String movieId) async {
+    try {
+      final response = await _dio.get(
+        '/movie/$movieId/similar',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': 'en-US',
+          'page': 1,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data['results'];
+      } else {
+        print('No similar movies found come back later!!');
+        return [];
+      }
+
+    } catch (e) {
+      throw Exception('Failed to load similar movies: $e');
+    }
+  }
+
+  Future<List<dynamic>> fetchRecommendedMovies(String movieId) async {
+    try {
+      final response = await _dio.get(
+        '/movie/$movieId/recommendations',
+        queryParameters: {
+          'api_key': _apiKey,
+          'language': 'en-US',
+          'page': 1,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return response.data['results'];
+      } else {
+        print('No recommended movies found come back later!!');
+        return [];
+      }
+
+    } catch (e) {
+      throw Exception('Failed to load recommended movies: $e');
+    }
+  }
+
+
 
 }

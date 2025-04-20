@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:moviebox/features/home/logic/home_state.dart';
-import 'package:moviebox/features/home/widgets/error_view.dart';
-import 'package:moviebox/features/home/widgets/searchbar.dart';
+import 'package:moviebox/features/home/widget/error_view.dart';
+import 'package:moviebox/features/home/widget/searchbar.dart';
 import '../../../data/repository/MovieRepository.dart';
 import '../logic/home_cubit.dart';
-import '../widgets/categorytabs.dart';
-import '../widgets/home_drawer.dart';
-import '../widgets/movie_grid.dart';
-import '../widgets/trending_carousel.dart';
+import '../widget/categorytabs.dart';
+import '../widget/home_drawer.dart';
+import '../widget/movie_grid.dart';
+import '../widget/trending_carousel.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
