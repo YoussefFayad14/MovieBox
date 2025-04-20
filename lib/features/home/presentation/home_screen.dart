@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:moviebox/features/home/logic/home_state.dart';
 import 'package:moviebox/features/home/widget/error_view.dart';
 import 'package:moviebox/features/home/widget/searchbar.dart';
-import '../../../data/repository/MovieRepository.dart';
+import '../../../data/repository/movie_repository.dart';
 import '../logic/home_cubit.dart';
 import '../widget/categorytabs.dart';
 import '../widget/home_drawer.dart';

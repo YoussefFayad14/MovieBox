@@ -1,7 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/repository/MovieRepository.dart';
+import '../../../data/repository/fav_movie_repository.dart';
+import '../../../data/repository/movie_repository.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../home/widget/error_view.dart';
 import '../logic/movie_details_cubit.dart';
@@ -21,15 +22,18 @@ class MovieDetailsScreen extends StatefulWidget {
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   late final MovieRepository _repository;
+  late final FavMovieRepository _favRepository;
   late final MovieDetailsCubit _movieDetailsCubit;
   late final SimilarMoviesCubit _similarMoviesCubit;
   late final RecommendedMoviesCubit _recommendedMoviesCubit;
+  final ValueNotifier<bool> _isFavorite = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
     _repository = MovieRepository();
-    _movieDetailsCubit = MovieDetailsCubit(_repository)..fetchMovieDetails(widget.id);
+    _favRepository = FavMovieRepository();
+    _movieDetailsCubit = MovieDetailsCubit(_repository, _favRepository)..fetchMovieDetails(widget.id);
     _similarMoviesCubit = SimilarMoviesCubit(_repository)..fetchSimilarMovies(widget.id);
     _recommendedMoviesCubit = RecommendedMoviesCubit(_repository)..fetchRecommendedMovies(widget.id);
   }
@@ -39,6 +43,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     _movieDetailsCubit.close();
     _similarMoviesCubit.close();
     _recommendedMoviesCubit.close();
+    _isFavorite.dispose();
     super.dispose();
   }
 
@@ -67,7 +72,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           actions: [
             IconButton(
               onPressed: () {
-                // TODO: Add share logic
+                // Add share logic
               },
               icon: Icon(Icons.share, color: Colors.white),
             ),
@@ -117,26 +122,29 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                              movie.title,
-                              style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                              SizedBox(
+                                width: 300,
+                                child: Text(
+                                  movie.title,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22.0,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  // Check if the movie is already favorite
-                                  // If not, add it to the favorites list
-                                  // If yes, remove it from the favorites list
+                                  context.read<MovieDetailsCubit>().toggleFavorite();
                                 },
                                 child: Icon(
-                                  Icons.favorite_border,
+                                  state.isFavorite ? Icons.favorite : Icons.favorite_border,
                                   size: 30,
-                                  color: Colors.white,
+                                  color: state.isFavorite? Colors.redAccent : Colors.white,
                                 ),
-                              )
+                              ),
                             ],
                           ),
                           const SizedBox(height: 10),
@@ -145,7 +153,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               const Icon(Icons.star, color: Colors.yellow, size: 24),
                               const SizedBox(width: 5),
                               Text(
-                                '${movie.rating}/10',
+                                '${movie.rating.toStringAsFixed(1)}/10',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18
@@ -182,14 +190,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 // Similar Movies
                 BlocBuilder<SimilarMoviesCubit, SimilarMoviesState>(
                   builder: (context, state) {
-                    if (state is SimilarMoviesLoading) {
-                      return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.amber,
-                          )
-                      );
-                    } else if (state is SimilarMoviesSuccess) {
+                    if (state is SimilarMoviesSuccess) {
                       return _buildMovieList(
+                        context: context,
                         title: 'Similar Movies',
                         movies: state.similarMovies,
                       );
@@ -204,14 +207,9 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 // Recommended Movies
                 BlocBuilder<RecommendedMoviesCubit, RecommendedMoviesState>(
                   builder: (context, state) {
-                    if (state is RecommendedMoviesLoading) {
-                      return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.amber,
-                          )
-                      );
-                    } else if (state is RecommendedMoviesSuccess) {
+                    if (state is RecommendedMoviesSuccess) {
                       return _buildMovieList(
+                        context: context,
                         title: 'Recommended Movies',
                         movies: state.recommendedMovies,
                       );
@@ -231,13 +229,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 }
 
 
-Widget _buildMovieList({required String title, required List<dynamic> movies}) {
+Widget _buildMovieList({required BuildContext context,required String title, required List<dynamic> movies}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: Colors.white,
@@ -248,61 +246,69 @@ Widget _buildMovieList({required String title, required List<dynamic> movies}) {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: movies.map((movie) {
-            return Card(
-              color: Colors.grey[900],
-              margin: const EdgeInsets.all(8.0),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-              elevation: 8.0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12.0)),
-                    child: CachedNetworkImage(
-                      imageUrl: movie.image,
-                      height: 200,
-                      width: 200,
-                      fit: BoxFit.fill,
+            return GestureDetector(
+              onTap: () {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => MovieDetailsScreen(id: movie.id.toString()))
+                  );
+                },
+                child:Card(
+                color: Colors.grey[900],
+                margin: const EdgeInsets.all(8.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                elevation: 8.0,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12.0)),
+                      child: CachedNetworkImage(
+                        imageUrl: movie.image,
+                        height: 200,
+                        width: 200,
+                        fit: BoxFit.fill,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 150,
-                          child: Text(
-                            movie.title,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 150,
+                            child: Text(
+                              movie.title,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 4.0),
-                        Text(
-                          movie.date,
-                          style: const TextStyle(color: Colors.grey, fontSize: 12.0),
-                        ),
-                        const SizedBox(height: 8.0),
-                        Row(
-                          children: [
-                            const Icon(Icons.star, color: Colors.yellow, size: 16.0),
-                            const SizedBox(width: 4.0),
-                            Text(
-                              '${movie.rating.toStringAsFixed(1)}',
-                              style: const TextStyle(color: Colors.yellow, fontSize: 16.0),
-                            ),
-                          ],
-                        ),
-                      ],
+                          const SizedBox(height: 4.0),
+                          Text(
+                            movie.date,
+                            style: const TextStyle(color: Colors.grey, fontSize: 12.0),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Row(
+                            children: [
+                              const Icon(Icons.star, color: Colors.yellow, size: 16.0),
+                              const SizedBox(width: 4.0),
+                              Text(
+                                '${movie.rating.toStringAsFixed(1)}',
+                                style: const TextStyle(color: Colors.yellow, fontSize: 16.0),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             );
           }).toList(),
