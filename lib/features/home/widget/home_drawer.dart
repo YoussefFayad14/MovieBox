@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../favorite/presentation/favorite_screen.dart';
+import '../presentation/home_screen.dart';
+
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
 
@@ -22,14 +25,20 @@ class HomeDrawer extends StatelessWidget {
             leading: Icon(Icons.home, color: Colors.white),
             title: Text('Home', style: TextStyle(color: Colors.white)),
             onTap: () {
-              // Handle profile navigation
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen())
+              );
             },
           ),
           ListTile(
             leading: Icon(Icons.favorite, color: Colors.white),
             title: Text('Favorites', style: TextStyle(color: Colors.white)),
             onTap: () {
-              // Handle favorites navigation
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => FavoriteScreen())
+              );
             },
           ),
           ListTile(

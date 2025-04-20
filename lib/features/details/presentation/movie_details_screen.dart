@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../data/repository/fav_movie_repository.dart';
+import '../../../data/repository/favorite_movie_repository.dart';
 import '../../../data/repository/movie_repository.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../home/widget/error_view.dart';
