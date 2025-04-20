@@ -1,5 +1,4 @@
 import 'package:moviebox/data/model/movie.dart';
-
 import '../remote/MovieService.dart';
 
 class MovieRepository {
@@ -23,6 +22,14 @@ class MovieRepository {
 
   Future<Movie?>? getMovieDetails(String id){
     return _movieService.getMovieDetails(id);
+  }
+
+  Future<List<dynamic>> fetchSimilarMovies(String id) {
+    return _movieService.fetchSimilarMovies(id);
+  }
+
+  Future<List<dynamic>> fetchRecommendedMovies(String id) {
+    return _movieService.fetchRecommendedMovies(id);
   }
 
 }
